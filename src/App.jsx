@@ -1,31 +1,144 @@
-// App.js
-import React, { useState, useLayoutEffect, useRef } from 'react';
+import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import QuestionDeck from './QuestionDeck';
 import QuestionModal from './QuestionModal';
+import MultipleChoiceModal from './MultipleChoiceModal';
+import MultiSelectModal from './MultiSelectModal';
+import TrueFalsePairModal from './TrueFalsePairModal';
+import EndGameSummary from './EndGameSummary';
+import './animations.css';
 
-// ===== THAY ĐỔI NẰM Ở ĐÂY =====
 const PLAYERS_CONFIG = [
     { id: 1, name: 'Nhóm số 1', pawn: '🚀', color: '#ff4757', shadow: '0 0 15px #ff4757' },
     { id: 2, name: 'Hoa Bằng Lăng', pawn: '🚗', color: '#1e90ff', shadow: '0 0 15px #1e90ff' },
-    { id: 3, name: 'Tổ Hợp', pawn: '🛸', color: '#9b59b6', shadow: '0 0 15px #9b59b6' }, // Đã thay đổi
+    { id: 3, name: 'Tổ Hợp', pawn: '🛸', color: '#9b59b6', shadow: '0 0 15px #9b59b6' },
 ];
 
 const NUMBER_OF_STEPS = 20;
-const STEPS_PER_ROW = 10;
+
 const sampleQuestions = [
-  { id: 1, points: 2, question: 'Mô hình S.M.A.R.T. được sử dụng để làm gì trong việc lập kế hoạch?' },
-  { id: 2, points: 3, question: 'Giai đoạn "Storming" (Sóng gió) trong mô hình phát triển nhóm của Tuckman có đặc điểm gì?' },
-  { id: 3, points: 1, question: 'OKR là viết tắt của cụm từ tiếng Anh nào?' },
-  { id: 4, points: 3, question: '"Ủy quyền" (Delegation) hiệu quả trong quản lý nghĩa là gì?' },
-  { id: 5, points: 2, question: 'Mục đích chính của việc đưa ra phản hồi xây dựng (constructive feedback) là gì?' },
-  { id: 6, points: 3, question: 'Phong cách lãnh đạo nào trao nhiều quyền tự chủ nhất cho các thành viên trong nhóm?' },
-  { id: 7, points: 3, question: 'Sự khác biệt cơ bản giữa một nhà lãnh đạo (leader) và một nhà quản lý (manager) là gì?'},
-  { id: 8, points: 1, question: 'Ma trận Eisenhower giúp ưu tiên công việc dựa trên hai tiêu chí nào?'},
-  { id: 9, points: 3, question: 'Tại sao việc xác định rõ "Why" (Lý do) của mục tiêu lại quan trọng đối với động lực của nhóm?'},
-  { id: 10, points: 2, question: 'Một kế hoạch hành động (action plan) tốt cần bao gồm những yếu tố cơ bản nào?'},
-  { id: 11, points: 3, question: '"Micromanagement" (Quản lý vi mô) là gì và tác hại của nó đến nhóm như thế nào?'},
-  { id: 12, points: 3, question: 'Để giải quyết xung đột trong nhóm, kỹ năng nào của người lãnh đạo được xem là quan trọng nhất?'},
-];
+  {
+    "id": 1,
+    "points": 3,
+    "question": "Hiện tượng “tư duy nhóm” (Groupthink) là gì và nó dẫn đến hậu quả tiêu cực nào?"
+  },
+  {
+    "id": 2,
+    "points": 3,
+    "question": "Sự khác biệt cơ bản giữa một nhà lãnh đạo (leader) và một nhà quản lý (manager) là gì?"
+  },
+  {
+    "id": 3,
+    "points": 2,
+    "type": "multiple_choice",
+    "question": "Một trong những vai trò chính của việc lập kế hoạch trong nhóm là gì?",
+    "options": [
+      "Tạo ra sự cạnh tranh giữa các thành viên",
+      "Giảm thiểu bất định và rủi ro",
+      "Loại bỏ hoàn toàn nhu cầu giao tiếp",
+      "Chỉ tập trung vào các mục tiêu dài hạn"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": 4,
+    "points": 3,
+    "type": "multi_select",
+    "question": "Trong mô hình S.M.A.R.T, chữ 'R' và 'T' đại diện cho điều gì? (Chọn 2 đáp án)",
+    "options": [
+      "Realistic (Thực tế)",
+      "Relevant (Liên quan)",
+      "Time-bound (Có thời hạn)",
+      "Trustworthy (Đáng tin cậy)"
+    ],
+    "correctAnswer": [1, 2]
+  },
+  {
+    "id": 5,
+    "points": 1,
+    "type": "multiple_choice",
+    "question": "OKR là viết tắt của cụm từ tiếng Anh nào?",
+    "options": [
+      "Objectives and Key Results",
+      "Official Key Responsibilities",
+      "Organizational Knowledge Repository",
+      "Operational Key Routines"
+    ],
+    "correctAnswer": 0
+  },
+  {
+    "id": 6,
+    "points": 3,
+    "question": "Trong phương pháp 5W1H, yếu tố \"Why\" (Tại sao) có vai trò quan trọng để làm gì?"
+  },
+  {
+    "id": 7,
+    "points": 3,
+    "type": "multi_select",
+    "question": "Ba nhiệm vụ chính nào kết hợp lại để tạo nên một nhà lãnh đạo? (Chọn 3 đáp án)",
+    "options": [
+      "Tạo tầm nhìn",
+      "Tạo cảm hứng",
+      "Tạo ảnh hưởng",
+      "Quản lý ngân sách",
+      "Lập kế hoạch chi tiết"
+    ],
+    "correctAnswer": [0, 1, 2]
+  },
+  {
+    "id": 8,
+    "points": 2,
+    "type": "true_false_pair",
+    "question": "Xác định tính đúng/sai của hai mệnh đề sau:",
+    "statements": [
+      {
+        "id": 0,
+        "text": "Một nhà quản lý giỏi thì chắc chắn cũng là một nhà lãnh đạo.",
+        "correctAnswer": false
+      },
+      {
+        "id": 1,
+        "text": "\"Key Results\" (Kết quả then chốt) trong OKR là các kết quả định tính, mang tính truyền cảm hứng.",
+        "correctAnswer": false
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "points": 3,
+    "question": "Quy trình thực hiện kỹ năng quản lý nhóm gồm 5 bước. Hãy cho biết bước thứ 3 trong quy trình đó là gì?"
+  },
+  {
+    "id": 10,
+    "points": 2,
+    "question": "Bước đầu tiên mà người quản lý cần làm khi giải quyết mâu thuẫn trong nhóm là gì?"
+  },
+  {
+    "id": 11,
+    "points": 2,
+    "type": "multiple_choice",
+    "question": "Mô hình S.M.A.R.T. được sử dụng để làm gì?",
+    "options": [
+      "Giải quyết xung đột trong nhóm",
+      "Xây dựng mục tiêu rõ ràng và khả thi",
+      "Phân chia ngân sách dự án",
+      "Đánh giá hiệu suất cuối kỳ của thành viên"
+    ],
+    "correctAnswer": 1
+  },
+  {
+    "id": 12,
+    "points": 3,
+    "type": "multiple_choice",
+    "question": "Phong cách lãnh đạo nào phù hợp nhất cho việc thảo luận và lấy ý kiến từ các thành viên?",
+    "options": [
+      "Độc đoán (Autocratic)",
+      "Dân chủ (Democratic)",
+      "Tự do (Laissez-faire)",
+      "Chỉ đạo (Directive)"
+    ],
+    "correctAnswer": 1
+  }
+]
 
 function GameBoard({ playerPositions }) {
     const [pawnCoords, setPawnCoords] = useState({});
@@ -89,38 +202,58 @@ function GameBoard({ playerPositions }) {
 }
 
 function App() {
-    const [playerPositions, setPlayerPositions] = useState({ 1: 0, 2: 0, 3: 0 });
+    const initialPlayerPositions = { 1: 0, 2: 0, 3: 0 };
+    const initialDoublePoints = { 1: true, 2: true, 3: true };
+
+    const [playerPositions, setPlayerPositions] = useState(initialPlayerPositions);
     const [answeredCardIds, setAnsweredCardIds] = useState([]);
     const [modal, setModal] = useState({ isOpen: false, question: null });
-
-    const [doublePointsRemaining, setDoublePointsRemaining] = useState({
-        1: true,
-        2: true,
-        3: true
-    });
-
+    const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+    const [, setIsPreparing] = useState(false);
+    const [doublePointsRemaining, setDoublePointsRemaining] = useState(initialDoublePoints);
     const [activeDoublePointsTeamId, setActiveDoublePointsTeamId] = useState(null);
     const [activeCardId, setActiveCardId] = useState(null);
+    const [isGameOver, setIsGameOver] = useState(false);
+
+    useEffect(() => {
+        if (answeredCardIds.length > 0 && answeredCardIds.length === sampleQuestions.length) {
+            setTimeout(() => {
+                setIsGameOver(true);
+            }, 500);
+        }
+    }, [answeredCardIds]);
 
     const handleActivateDoublePoints = (teamId, cardId) => {
-        if (!doublePointsRemaining[teamId]) {
-            console.log(`Đội ${teamId} đã hết lượt nhân đôi điểm!`);
-            return;
-        }
-
+        if (!doublePointsRemaining[teamId]) return;
         setActiveDoublePointsTeamId(teamId);
         setActiveCardId(cardId);
-        console.log(`Đội ${teamId} đã kích hoạt NHÂN ĐÔI ĐIỂM cho thẻ ${cardId}!`);
     };
 
     const handleViewQuestion = (question) => {
-        setModal({ isOpen: true, question: question });
+        setIsPreparing(true);
+        setTimeout(() => {
+            setIsPreparing(false);
+            setModal({ isOpen: true, question: question });
+            setIsAnimatingOut(false);
+        }, 100);
     };
 
-    const handleCloseModal = () => {
-        setModal({ isOpen: false, question: null });
-        setActiveDoublePointsTeamId(null);
-        setActiveCardId(null);
+    const handleSkipQuestion = () => {
+        if (!modal.question) return;
+        setAnsweredCardIds(prevIds => [...prevIds, modal.question.id]);
+        if (activeCardId === modal.question.id && activeDoublePointsTeamId !== null) {
+            setDoublePointsRemaining(prev => ({
+                ...prev,
+                [activeDoublePointsTeamId]: false
+            }));
+        }
+        setIsAnimatingOut(true);
+        setTimeout(() => {
+            setModal({ isOpen: false, question: null });
+            setActiveDoublePointsTeamId(null);
+            setActiveCardId(null);
+            setIsAnimatingOut(false);
+        }, 300);
     };
 
     const handleQuestionAnswered = (points, questionId, awardedTeamId, doublePointsActivatorId) => {
@@ -129,43 +262,39 @@ function App() {
             const finalPosition = newPosition >= NUMBER_OF_STEPS ? NUMBER_OF_STEPS - 1 : newPosition;
             return { ...prevPositions, [awardedTeamId]: finalPosition };
         });
-
         setAnsweredCardIds(prevIds => [...prevIds, questionId]);
-
         if (doublePointsActivatorId !== null) {
-            setDoublePointsRemaining(prev => ({
-                ...prev,
-                [doublePointsActivatorId]: false
-            }));
-            console.log(`Đội ${doublePointsActivatorId} đã SỬ DỤNG lượt nhân đôi điểm (bất kể đội nào nhận điểm).`);
+            setDoublePointsRemaining(prev => ({ ...prev, [doublePointsActivatorId]: false }));
         }
+        setIsAnimatingOut(true);
+        setTimeout(() => {
+            setModal({ isOpen: false, question: null });
+            setActiveDoublePointsTeamId(null);
+            setActiveCardId(null);
+            setIsAnimatingOut(false);
+        }, 300);
+    };
 
-        setActiveDoublePointsTeamId(null);
-        setActiveCardId(null);
+    const handleRestartGame = () => {
+        setPlayerPositions(initialPlayerPositions);
+        setAnsweredCardIds([]);
+        setDoublePointsRemaining(initialDoublePoints);
+        setIsGameOver(false);
     };
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.header}>🏁 Chặng Đua Hội Nhập 🏁</h1>
-
+            <h1 style={styles.header}>🏁 Trò chơi Hội Nhập 🏁</h1>
             <div style={styles.doublePointsStatus}>
                 <h3>Lượt nhân đôi điểm còn lại:</h3>
                 <div style={styles.doublePointsBadges}>
                     {PLAYERS_CONFIG.map(player => (
-                        <div
-                            key={player.id}
-                            style={{
-                                ...styles.doublePointsBadge,
-                                backgroundColor: doublePointsRemaining[player.id] ? player.color : '#6b7280',
-                                opacity: doublePointsRemaining[player.id] ? 1 : 0.5
-                            }}
-                        >
+                        <div key={player.id} style={{ ...styles.doublePointsBadge, backgroundColor: doublePointsRemaining[player.id] ? player.color : '#6b7280', opacity: doublePointsRemaining[player.id] ? 1 : 0.5 }}>
                             {player.pawn} {player.name}: {doublePointsRemaining[player.id] ? 'Còn lượt' : 'Đã dùng'}
                         </div>
                     ))}
                 </div>
             </div>
-
             <QuestionDeck
                 questions={sampleQuestions}
                 answeredCardIds={answeredCardIds}
@@ -174,24 +303,79 @@ function App() {
                 onActivateDoublePoints={handleActivateDoublePoints}
                 onViewQuestion={handleViewQuestion}
             />
-
             <GameBoard playerPositions={playerPositions} />
 
-            <QuestionModal
-                isOpen={modal.isOpen}
-                onClose={handleCloseModal}
-                question={modal.question}
-                players={PLAYERS_CONFIG}
-                onCorrectAnswer={handleQuestionAnswered}
-                activeDoublePointsTeamId={activeCardId === modal.question?.id ? activeDoublePointsTeamId : null}
-            />
+
+
+            {modal.isOpen && (
+                <div
+                    style={styles.overlay}
+                    className={isAnimatingOut ? 'modal-overlay-exit' : 'modal-overlay-enter'}
+                    onClick={handleSkipQuestion}
+                >
+                    {(() => {
+                        const props = {
+                            onClose: handleSkipQuestion,
+                            question: modal.question,
+                            players: PLAYERS_CONFIG,
+                            onCorrectAnswer: handleQuestionAnswered,
+                            activeDoublePointsTeamId: activeCardId === modal.question?.id ? activeDoublePointsTeamId : null,
+                            isAnimatingOut: isAnimatingOut,
+                        };
+                        switch (modal.question.type) {
+                            case 'true_false_pair': return <TrueFalsePairModal {...props} />;
+                            case 'multi_select': return <MultiSelectModal {...props} />;
+                            case 'multiple_choice': return <MultipleChoiceModal {...props} />;
+                            default: return <QuestionModal {...props} />;
+                        }
+                    })()}
+                </div>
+            )}
+
+            {isGameOver && (
+                <EndGameSummary
+                    players={PLAYERS_CONFIG}
+                    positions={playerPositions}
+                    onRestart={handleRestartGame}
+                />
+            )}
         </div>
     );
 }
 
-
-// (Phần styles giữ nguyên, không cần thay đổi)
 const styles = {
+    preparingOverlay: {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(5px)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        zIndex: 2000,
+        color: 'white',
+        animation: 'fadeIn 0.3s'
+    },
+    preparingContent: {
+        textAlign: 'center',
+    },
+    preparingSpinner: {
+        border: '4px solid rgba(255, 255, 255, 0.3)',
+        borderTop: '4px solid #feca57',
+        borderRadius: '50%',
+        width: '50px',
+        height: '50px',
+        animation: 'spin 1s linear infinite',
+        margin: '0 auto 20px auto',
+    },
+    '@keyframes spin': {
+        '0%': { transform: 'rotate(0deg)' },
+        '100%': { transform: 'rotate(360deg)' },
+    },
+    overlay: {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(5px)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        zIndex: 1000
+    },
     app: {
         backgroundColor: '#1a1a2e',
         backgroundImage: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 74%)',
@@ -212,7 +396,6 @@ const styles = {
         backgroundColor: 'rgba(15, 23, 42, 0.8)',
         color: '#e0e0e0',
         borderRadius: '22px',
-
         padding:'20px',
         paddingTop: '0px',
         marginBottom: '0px',

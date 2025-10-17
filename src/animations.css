@@ -1,0 +1,94 @@
+/* animations.css */
+
+/* (Các animation cũ của modal giữ nguyên) */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+.modal-overlay-enter { animation: fadeIn 0.4s ease-out forwards; }
+.modal-overlay-exit { animation: fadeOut 0.4s ease-in forwards; }
+
+@keyframes springIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes shrinkOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
+.modal-content-enter { animation: springIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.modal-content-exit { animation: shrinkOut 0.4s ease-in forwards; }
+
+@keyframes fadeInUpItem { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+
+/* ===== MỚI: Animation cho màn hình tổng kết ===== */
+@keyframes summaryEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+.summary-enter {
+    animation: summaryEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+
+/* ===== MỚI: Animation cho pháo hoa ===== */
+.fireworks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.firework {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    height: 80px;
+    background-image: linear-gradient(to top, #feca57, transparent);
+    animation: firework-shoot 1.5s ease-out forwards;
+}
+
+#fw1 { left: 20%; animation-delay: 0.2s; }
+#fw2 { left: 80%; animation-delay: 0.5s; }
+#fw3 { left: 50%; animation-delay: 1s; }
+
+@keyframes firework-shoot {
+    0% { transform: translateY(0); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(-70vh); opacity: 0; }
+}
+
+.explosion {
+    position: absolute;
+    top: -10px;
+    left: 2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0;
+    animation: explosion 1.2s ease-out forwards;
+    animation-delay: 1.5s; /* Phải khớp với thời gian của firework-shoot */
+}
+
+@keyframes explosion {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0) translateY(100px); }
+}
+
+/* Tạo ra các tia pháo hoa theo các hướng khác nhau */
+.explosion:nth-child(1) { transform: rotate(0deg) translateX(40px) rotate(0deg); animation-duration: 0.8s; }
+.explosion:nth-child(2) { transform: rotate(45deg) translateX(40px) rotate(-45deg); animation-duration: 0.9s; }
+.explosion:nth-child(3) { transform: rotate(90deg) translateX(40px) rotate(-90deg); animation-duration: 1s; }
+.explosion:nth-child(4) { transform: rotate(135deg) translateX(40px) rotate(-135deg); animation-duration: 1.1s; }
+.explosion:nth-child(5) { transform: rotate(180deg) translateX(40px) rotate(-180deg); animation-duration: 1.2s; }
+.explosion:nth-child(6) { transform: rotate(225deg) translateX(40px) rotate(-225deg); animation-duration: 1.3s; }
+.explosion:nth-child(7) { transform: rotate(270deg) translateX(40px) rotate(-270deg); animation-duration: 1.4s; }
+.explosion:nth-child(8) { transform: rotate(315deg) translateX(40px) rotate(-315deg); animation-duration: 1.5s; }
+
+#fw1 .explosion { background-color: #ff4757; }
+#fw2 .explosion { background-color: #1e90ff; }
+#fw3 .explosion { background-color: #9b59b6; }

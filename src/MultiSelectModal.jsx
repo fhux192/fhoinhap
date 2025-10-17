@@ -1,0 +1,183 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut }) => {
+    const [selectedAnswers, setSelectedAnswers] = useState([]);
+    const [isAnswered, setIsAnswered] = useState(false);
+    const [isCorrect, setIsCorrect] = useState(null);
+    const [timeLeft, setTimeLeft] = useState(90);
+    const timerRef = useRef(null);
+
+    const handleTimeUp = () => {
+        setIsAnswered(true);
+        setIsCorrect(false);
+    };
+
+    useEffect(() => {
+        setSelectedAnswers([]);
+        setIsAnswered(false);
+        setIsCorrect(null);
+        setTimeLeft(90);
+        timerRef.current = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+
+        return () => clearInterval(timerRef.current);
+    }, [question]);
+
+    useEffect(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerRef.current);
+            handleTimeUp();
+        }
+    }, [timeLeft]);
+
+    const isDouble = activeDoublePointsTeamId !== null;
+    const points = isDouble ? question.points * 2 : question.points;
+
+    const handleOptionClick = (index) => {
+        if (isAnswered) return;
+        setSelectedAnswers(prev => prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]);
+    };
+
+    const handleCheckAnswer = () => {
+        if (selectedAnswers.length === 0) return;
+        clearInterval(timerRef.current);
+        setIsAnswered(true);
+        const sortedSelected = [...selectedAnswers].sort();
+        const sortedCorrect = [...question.correctAnswer].sort();
+        setIsCorrect(JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect));
+    };
+
+    const handleAwardPoints = (teamId) => {
+        onCorrectAnswer(points, question.id, teamId, activeDoublePointsTeamId);
+    };
+
+    // Style cho từng nút
+    const getOptionStyle = (index) => {
+        const style = { ...styles.optionButton };
+        if (isAnswered) {
+            const isCorrectAnswer = question.correctAnswer.includes(index);
+            const isSelected = selectedAnswers.includes(index);
+            if (!isCorrectAnswer && !isSelected) style.opacity = 0.6;
+        }
+        return style;
+    };
+
+    // Style cho vòng tròn checkbox
+    const getCircleStyle = (index) => {
+        let style = { ...styles.optionCircle };
+        // Trước khi kiểm tra
+        if (!isAnswered && selectedAnswers.includes(index)) {
+            style = { ...style, ...styles.selectedCircle };
+        }
+        // Sau khi kiểm tra
+        if (isAnswered) {
+            const isCorrectAnswer = question.correctAnswer.includes(index);
+            const isSelected = selectedAnswers.includes(index);
+            if (isCorrectAnswer) {
+                style = { ...style, ...styles.correctCircle };
+            } else if (isSelected && !isCorrectAnswer) {
+                style = { ...style, ...styles.incorrectCircle };
+            }
+        }
+        return style;
+    };
+
+    return (
+        <div
+            className={isAnimatingOut ? 'modal-content-exit' : 'modal-content-enter'}
+            style={styles.modal}
+            onClick={(e) => e.stopPropagation()}
+        >
+            <div style={styles.header}>
+                <span style={{...styles.timer, color: timeLeft <= 10 ? '#ff4757' : 'white'}}>
+                    ⏰ {timeLeft}s
+                </span>
+                <span style={{ ...styles.points, backgroundColor: isDouble ? '#ff4757' : '#feca57' }}>
+                    {points} ĐIỂM {isDouble && '(x2)'}
+                </span>
+                <button style={styles.closeButton} onClick={onClose}>&times;</button>
+            </div>
+
+            <div style={styles.content}>
+                <p style={styles.questionText}>{question.question}</p>
+                <p style={styles.instructionText}>Chọn tất cả các đáp án đúng</p>
+                <div style={styles.optionsContainer}>
+                    {question.options.map((option, index) => {
+                        // ===== THAY ĐỔI: Tạo style animation động cho từng item =====
+                        const itemAnimation = {
+                            animation: isAnimatingOut ? 'none' : `fadeInUpItem 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+                            animationDelay: `${300 + index * 120}ms`,
+                            animationFillMode: 'backwards',
+                        };
+
+                        const finalStyle = { ...getOptionStyle(index), ...itemAnimation };
+
+                        return (
+                            <div
+                                key={index}
+                                style={finalStyle} // Sử dụng style đã kết hợp
+                                onClick={() => handleOptionClick(index)}
+                            >
+                                <div style={getCircleStyle(index)}>
+                                    {isAnswered && question.correctAnswer.includes(index) ? '✓' : String.fromCharCode(65 + index)}
+                                </div>
+                                <span style={styles.optionText}>{option}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div style={styles.footer}>
+                {!isAnswered && (
+                    <button style={{...styles.checkAnswerButton, opacity: selectedAnswers.length === 0 ? 0.5 : 1}} onClick={handleCheckAnswer} disabled={selectedAnswers.length === 0}>
+                        Kiểm tra đáp án
+                    </button>
+                )}
+                {isAnswered && isCorrect && (
+                    <>
+                        <p style={{...styles.feedbackText, color: '#2ed573'}}>Chính xác!</p>
+                        <p style={styles.awardText}>Thưởng điểm cho đội:</p>
+                        <div style={styles.answerButtonsContainer}>
+                            {players.map(player => (
+                                <button key={player.id} style={{ ...styles.awardButton, backgroundColor: player.color }} onClick={() => handleAwardPoints(player.id)}>
+                                    {player.pawn} {player.name}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+                {isAnswered && !isCorrect && (
+                     <p style={{...styles.feedbackText, color: '#ff4757'}}>
+                        {timeLeft <= 0 ? "Đã hết giờ!" : "Không chính xác!"}
+                     </p>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const styles = {
+    modal: { backgroundColor: '#16213e', color: 'white', borderRadius: '16px', padding: '20px', width: '90%', maxWidth: '800px', boxShadow: '0 5px 25px rgba(0,0,0,0.5)', border: '1px solid #4a4a68', display: 'flex', flexDirection: 'column', gap: '15px' },
+    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #4a4a68', paddingBottom: '10px' },
+    timer: { fontSize: '1.5rem', fontWeight: 'bold', fontFamily: "'Courier New', Courier, monospace", transition: 'color 0.3s' },
+    points: { padding: '5px 15px', borderRadius: '20px', fontSize: '1.2rem', fontWeight: 'bold', color: '#1a1a2e' },
+    closeButton: { background: 'none', border: 'none', color: 'white', fontSize: '2rem', cursor: 'pointer' },
+    content: { padding: '10px 0' },
+    questionText: { fontSize: '1.5rem', textAlign: 'center', margin: '0 0 10px 0', fontWeight: 'bold' },
+    instructionText: { fontSize: '1rem', color: '#ccc', textAlign: 'center', margin: '0 0 20px 0' },
+    optionsContainer: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' },
+    optionButton: { background: 'rgba(255, 255, 255, 0.05)', border: '2px solid #4a4a68', padding: '15px', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left' },
+    optionCircle: { width: '30px', height: '30px', borderRadius: '50%', border: '2px solid #feca57', color: '#feca57', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, transition: 'all 0.2s ease' },
+    selectedCircle: { backgroundColor: '#3b82f6', borderColor: '#3b82f6', color: 'white' },
+    correctCircle: { backgroundColor: '#2ed573', borderColor: '#2ed573', color: 'white', fontSize: '1.5rem' },
+    incorrectCircle: { backgroundColor: '#ff4757', borderColor: '#ff4757', color: 'white' },
+    optionText: { flex: 1, fontSize: '1rem' },
+    footer: { paddingTop: '10px', borderTop: '1px solid #4a4a68', textAlign: 'center', minHeight: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'center' },
+    checkAnswerButton: { alignSelf: 'center', padding: '12px 25px', width: '50%', maxWidth: '300px', border: 'none', borderRadius: '8px', backgroundColor: '#feca57', color: '#1a1a2e', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.1rem', transition: 'opacity 0.2s' },
+    feedbackText: { fontSize: '1.4rem', fontWeight: 'bold', margin: '10px 0' },
+    awardText: { margin: '10px 0', color: '#ccc' },
+    answerButtonsContainer: { display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' },
+    awardButton: { padding: '10px 15px', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', minWidth: '200px', justifyContent: 'center' }
+};
+
+export default MultiSelectModal;

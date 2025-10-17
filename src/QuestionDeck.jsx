@@ -75,7 +75,7 @@ const QuestionCard = ({
                     <span style={numberStyle}>
                         {isAnswered ? '✓' : sequenceNumber}
                     </span>
-                    {isAnswered && <span style={isMobile ? styles.cardUsedTextMobile : styles.cardUsedText}>ĐÃ TRẢ LỜI</span>}
+                    {isAnswered && <span style={isMobile ? styles.cardUsedTextMobile : styles.cardUsedText}>ĐÃ SỬ DỤNG</span>}
                 </div>
                 {/* --- MẶT SAU THẺ (HIỂN THỊ ĐIỂM THẬT) --- */}
                 <div style={backFaceStyle}>

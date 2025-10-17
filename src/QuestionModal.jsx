@@ -1,114 +1,95 @@
 import React from 'react';
 
-const QuestionModal = ({ isOpen, onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId }) => {
-    if (!isOpen) {
-        return null;
-    }
+const QuestionModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut }) => {
 
     const isDouble = activeDoublePointsTeamId !== null;
     const points = isDouble ? question.points * 2 : question.points;
 
     const handleAnswerClick = (teamId) => {
         onCorrectAnswer(points, question.id, teamId, activeDoublePointsTeamId);
-        onClose();
+        // onClose(); // ===== XÓA DÒNG NÀY ĐI =====
     };
 
     return (
-        <div style={styles.overlay} onClick={onClose}>
-            <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <div style={styles.header}>
-                    <span style={{...styles.points, backgroundColor: isDouble ? '#ff4757' : '#feca57'}}>
-                        {points} ĐIỂM {isDouble && '(x2)'}
-                    </span>
-                    <button style={styles.closeButton} onClick={onClose}>&times;</button>
-                </div>
-                <div style={styles.content}>
-                    <p style={styles.questionText}>{question.question}</p>
-                </div>
-                <div style={styles.footer}>
-                    <p style={styles.awardText}>Thưởng cho đội (demo):</p>
-                    <div style={styles.answerButtonsContainer}>
-                        {players.map(player => (
-                            <button
-                                key={player.id}
-                                style={{...styles.answerButton, backgroundColor: player.color}}
-                                onClick={() => handleAnswerClick(player.id)}
-                            >
-                                {player.pawn} {player.name}
-                            </button>
-                        ))}
-                    </div>
+        <div
+            className={isAnimatingOut ? 'modal-content-exit' : 'modal-content-enter'}
+            style={styles.modal}
+            onClick={(e) => e.stopPropagation()}
+        >
+            {/* ... nội dung còn lại của modal không đổi ... */}
+            <div style={styles.header}>
+                <span style={{...styles.points, backgroundColor: isDouble ? '#ff4757' : '#feca57'}}>
+                    {points} ĐIỂM {isDouble && '(x2)'}
+                </span>
+                <button style={styles.closeButton} onClick={onClose}>&times;</button>
+            </div>
+
+            <div style={styles.content}>
+                <p style={styles.questionText}>{question.question}</p>
+            </div>
+
+            <div style={styles.footer}>
+                <p style={styles.awardText}>Thưởng cho đội (demo):</p>
+                <div style={styles.answerButtonsContainer}>
+                    {players.map(player => (
+                        <button
+                            key={player.id}
+                            style={{...styles.answerButton, backgroundColor: player.color}}
+                            onClick={() => handleAnswerClick(player.id)}
+                        >
+                            {player.pawn} {player.name}
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>
     );
 };
 
+// ... styles không đổi ...
 const styles = {
-    overlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000
-    },
     modal: {
-        backgroundColor: '#16213e',
-        color: 'white',
-        borderRadius: '16px',
-        padding: '20px',
-        width: '80%',
-        maxWidth: '1000px',
-        boxShadow: '0 5px 25px rgba(0,0,0,0.5)',
-        border: '1px solid #4a4a68'
+        backgroundColor: '#1e293b', color: '#e2e8f0', borderRadius: '16px',
+        padding: '25px', width: '90%', maxWidth: '800px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)', border: '1px solid #334155',
+        display: 'flex', flexDirection: 'column', gap: '20px'
     },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottom: '1px solid #4a4a68',
-        paddingBottom: '10px'
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     },
     points: {
-        padding: '5px 15px',
-        borderRadius: '20px',
-        fontSize: '1.2rem',
-        fontWeight: 'bold',
-        color: '#1a1a2e'
+        padding: '5px 15px', borderRadius: '20px', fontSize: '1.2rem',
+        fontWeight: 'bold', color: '#1a1a2e'
     },
     closeButton: {
-        background: 'none',
-        border: 'none',
-        color: 'white',
-        fontSize: '2rem',
-        cursor: 'pointer'
+        background: 'none', border: 'none', color: '#94a3b8',
+        fontSize: '2.5rem', cursor: 'pointer', lineHeight: 1,
+        transition: 'color 0.2s',
     },
     content: {
-        padding: '10px 0'
+        padding: '20px 0',
+        borderTop: '1px solid #334155',
+        borderBottom: '1px solid #334155',
     },
     questionText: {
-        fontSize: '1.2rem',
+        fontSize: '1.8rem',
+        fontWeight: '600',
         textAlign: 'center',
-        margin: 0
+        lineHeight: 1.6,
+        margin: 0,
+        color: '#f1f5f9',
     },
     footer: {
         paddingTop: '10px',
-        borderTop: '1px solid #4a4a68'
     },
     awardText: {
         textAlign: 'center',
         margin: '0 0 10px 0',
-        color: '#ccc'
+        color: '#94a3b8'
     },
     answerButtonsContainer: {
         display: 'flex',
         justifyContent: 'center',
-
         gap: '10px',
         flexWrap: 'wrap'
     },
@@ -116,7 +97,7 @@ const styles = {
         padding: '10px 15px',
         marginTop: '5px',
         border: 'none',
-         width: '240px',
+        width: '240px',
         maxWidth: '240px',
         justifyContent: 'center',
         borderRadius: '8px',
