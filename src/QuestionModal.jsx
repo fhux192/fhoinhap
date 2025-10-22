@@ -1,14 +1,17 @@
 import React from 'react';
 
-const QuestionModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut }) => {
+// ===== THAY ĐỔI: Nhận thêm prop `currentPlayerId` =====
+const QuestionModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut, currentPlayerId }) => {
 
     const isDouble = activeDoublePointsTeamId !== null;
     const points = isDouble ? question.points * 2 : question.points;
 
     const handleAnswerClick = (teamId) => {
         onCorrectAnswer(points, question.id, teamId, activeDoublePointsTeamId);
-        // onClose(); // ===== XÓA DÒNG NÀY ĐI =====
     };
+
+    // ===== THAY ĐỔI: Tìm người chơi hiện tại =====
+    const currentPlayer = players.find(p => p.id === currentPlayerId);
 
     return (
         <div
@@ -16,7 +19,6 @@ const QuestionModal = ({ onClose, question, players, onCorrectAnswer, activeDoub
             style={styles.modal}
             onClick={(e) => e.stopPropagation()}
         >
-            {/* ... nội dung còn lại của modal không đổi ... */}
             <div style={styles.header}>
                 <span style={{...styles.points, backgroundColor: isDouble ? '#ff4757' : '#feca57'}}>
                     {points} ĐIỂM {isDouble && '(x2)'}
@@ -28,25 +30,29 @@ const QuestionModal = ({ onClose, question, players, onCorrectAnswer, activeDoub
                 <p style={styles.questionText}>{question.question}</p>
             </div>
 
+            {/* ===== THAY ĐỔI: Chỉ hiển thị 1 nút cho người chơi hiện tại ===== */}
             <div style={styles.footer}>
-                <p style={styles.awardText}>Thưởng cho đội (demo):</p>
+                <p style={styles.awardText}>Đội trả lời đúng:</p>
                 <div style={styles.answerButtonsContainer}>
-                    {players.map(player => (
+                    {/* Kiểm tra nếu `currentPlayer` tồn tại */}
+                    {currentPlayer ? (
                         <button
-                            key={player.id}
-                            style={{...styles.answerButton, backgroundColor: player.color}}
-                            onClick={() => handleAnswerClick(player.id)}
+                            key={currentPlayer.id}
+                            style={{...styles.answerButton, backgroundColor: currentPlayer.color}}
+                            onClick={() => handleAnswerClick(currentPlayer.id)}
                         >
-                            {player.pawn} {player.name}
+                            {currentPlayer.pawn} {currentPlayer.name}
                         </button>
-                    ))}
+                    ) : (
+                        <p>Lỗi: Không tìm thấy người chơi hiện tại.</p>
+                    )}
                 </div>
             </div>
+            {/* ========================================================== */}
         </div>
     );
 };
 
-// ... styles không đổi ...
 const styles = {
     modal: {
         backgroundColor: '#1e293b', color: '#e2e8f0', borderRadius: '16px',

@@ -1,4 +1,3 @@
-// QuestionDeck.js
 import React, { useState, useEffect } from 'react';
 
 const QuestionCard = ({
@@ -11,13 +10,13 @@ const QuestionCard = ({
     doublePointsState,
     onActivateDoublePoints,
     activeDoublePointsTeamId,
-    sequenceNumber // THÊM MỚI: Nhận prop số thứ tự
+    sequenceNumber,
+    currentPlayerId // ===== NHẬN PROP MỚI =====
 }) => {
     const [isViewBtnHovered, setViewBtnHovered] = useState(false);
     const [hoveredX2Id, setHoveredX2Id] = useState(null);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Xóa bỏ logic màu sắc không cần thiết cho mặt trước
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth < 768);
@@ -85,8 +84,19 @@ const QuestionCard = ({
                             <p style={isMobile ? styles.pointsOnBackMobile : styles.pointsOnBack}>{questionData.points}</p>
                             <p style={isMobile ? styles.pointsLabelMobile : styles.pointsLabel}>ĐIỂM</p>
                         </div>
+
+                        {/* ===== CẬP NHẬT LOGIC NÚT X2 ===== */}
                         <div style={styles.doublePointsContainer}>
                             {isFlipped && activeDoublePointsTeamId === null && players.map(p => {
+                                // ===== ĐIỀU KIỆN MỚI =====
+                                // Chỉ hiển thị nút x2 nếu:
+                                // 1. Đội đó CÒN lượt x2
+                                // 2. Đội đó LÀ NGƯỜI CHƠI HIỆN TẠI (p.id === currentPlayerId)
+                                if (!doublePointsState[p.id] || p.id !== currentPlayerId) {
+                                    return null;
+                                }
+                                // ===========================
+
                                 const doubleButtonStyle = {
                                     ...styles.doubleButton,
                                     ...(isMobile ? styles.doubleButtonMobile : {}),
@@ -95,24 +105,24 @@ const QuestionCard = ({
                                     ...(hoveredX2Id === p.id ? {...styles.doubleButtonHover, boxShadow: `0 0 15px ${p.color}`} : {})
                                 };
                                 return (
-                                    doublePointsState[p.id] && (
-                                        <button
-                                            key={p.id}
-                                            title={`Đội ${p.name} nhân đôi`}
-                                            style={doubleButtonStyle}
-                                            onMouseEnter={() => setHoveredX2Id(p.id)}
-                                            onMouseLeave={() => setHoveredX2Id(null)}
-                                            onClick={(e) => handleButtonClick(e, () => onActivateDoublePoints(p.id))}
-                                        >
-                                            x2
-                                        </button>
-                                    )
+                                    <button
+                                        key={p.id}
+                                        title={`Đội ${p.name} nhân đôi`}
+                                        style={doubleButtonStyle}
+                                        onMouseEnter={() => setHoveredX2Id(p.id)}
+                                        onMouseLeave={() => setHoveredX2Id(null)}
+                                        onClick={(e) => handleButtonClick(e, () => onActivateDoublePoints(p.id))}
+                                    >
+                                        x2
+                                    </button>
                                 );
                             })}
                             {activeDoublePointsTeamId !== null && (
                                 <p style={isMobile ? styles.doubleIndicatorMobile : styles.doubleIndicator}>x2 ĐIỂM!</p>
                             )}
                         </div>
+                        {/* ================================== */}
+                        
                         <button
                             style={viewButtonStyle}
                             onMouseEnter={() => setViewBtnHovered(true)}
@@ -129,7 +139,8 @@ const QuestionCard = ({
 };
 
 // --- Component chính cho bộ bài ---
-const QuestionDeck = ({ questions, answeredCardIds, players, doublePointsState, onActivateDoublePoints, onViewQuestion }) => {
+// ===== NHẬN PROP MỚI: currentPlayerId =====
+const QuestionDeck = ({ questions, answeredCardIds, players, doublePointsState, onActivateDoublePoints, onViewQuestion, currentPlayerId }) => {
     const [flippedCardId, setFlippedCardId] = useState(null);
     const [activeDoublePointsTeamId, setActiveDoublePointsTeamId] = useState(null);
     const [isMobile, setIsMobile] = useState(false);
@@ -177,13 +188,13 @@ const QuestionDeck = ({ questions, answeredCardIds, players, doublePointsState, 
                     doublePointsState={doublePointsState}
                     onActivateDoublePoints={handleActivateDoublePoints}
                     activeDoublePointsTeamId={flippedCardId === q.id ? activeDoublePointsTeamId : null}
+                    currentPlayerId={currentPlayerId} // ===== TRUYỀN XUỐNG CARD =====
                 />
             ))}
         </div>
     );
 };
 
-// (Phần styles giữ nguyên, không cần thay đổi)
 const styles = {
     deckContainer: {
         display: 'grid',
@@ -357,6 +368,9 @@ const styles = {
         width: '26px',
         height: '26px',
         fontSize: '0.8rem',
+    },
+    doubleButtonHover: {
+        /* (Bạn có thể thêm style hover tại đây nếu muốn, ví dụ: transform: 'scale(1.1)') */
     },
     doubleIndicator: {
         fontSize: '0.8rem',

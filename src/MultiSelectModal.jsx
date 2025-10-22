@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut }) => {
+// ===== THAY ĐỔI: Nhận thêm prop `currentPlayerId` =====
+const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut, currentPlayerId }) => {
     const [selectedAnswers, setSelectedAnswers] = useState([]);
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(null);
@@ -50,7 +51,9 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
         onCorrectAnswer(points, question.id, teamId, activeDoublePointsTeamId);
     };
 
-    // Style cho từng nút
+    // ===== THAY ĐỔI: Tìm người chơi hiện tại =====
+    const currentPlayer = players.find(p => p.id === currentPlayerId);
+
     const getOptionStyle = (index) => {
         const style = { ...styles.optionButton };
         if (isAnswered) {
@@ -61,14 +64,11 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
         return style;
     };
 
-    // Style cho vòng tròn checkbox
     const getCircleStyle = (index) => {
         let style = { ...styles.optionCircle };
-        // Trước khi kiểm tra
         if (!isAnswered && selectedAnswers.includes(index)) {
             style = { ...style, ...styles.selectedCircle };
         }
-        // Sau khi kiểm tra
         if (isAnswered) {
             const isCorrectAnswer = question.correctAnswer.includes(index);
             const isSelected = selectedAnswers.includes(index);
@@ -102,7 +102,6 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
                 <p style={styles.instructionText}>Chọn tất cả các đáp án đúng</p>
                 <div style={styles.optionsContainer}>
                     {question.options.map((option, index) => {
-                        // ===== THAY ĐỔI: Tạo style animation động cho từng item =====
                         const itemAnimation = {
                             animation: isAnimatingOut ? 'none' : `fadeInUpItem 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
                             animationDelay: `${300 + index * 120}ms`,
@@ -114,7 +113,7 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
                         return (
                             <div
                                 key={index}
-                                style={finalStyle} // Sử dụng style đã kết hợp
+                                style={finalStyle}
                                 onClick={() => handleOptionClick(index)}
                             >
                                 <div style={getCircleStyle(index)}>
@@ -127,6 +126,7 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
                 </div>
             </div>
 
+            {/* ===== THAY ĐỔI: Cập nhật logic footer ===== */}
             <div style={styles.footer}>
                 {!isAnswered && (
                     <button style={{...styles.checkAnswerButton, opacity: selectedAnswers.length === 0 ? 0.5 : 1}} onClick={handleCheckAnswer} disabled={selectedAnswers.length === 0}>
@@ -138,11 +138,13 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
                         <p style={{...styles.feedbackText, color: '#2ed573'}}>Chính xác!</p>
                         <p style={styles.awardText}>Thưởng điểm cho đội:</p>
                         <div style={styles.answerButtonsContainer}>
-                            {players.map(player => (
-                                <button key={player.id} style={{ ...styles.awardButton, backgroundColor: player.color }} onClick={() => handleAwardPoints(player.id)}>
-                                    {player.pawn} {player.name}
+                            {currentPlayer ? (
+                                <button key={currentPlayer.id} style={{ ...styles.awardButton, backgroundColor: currentPlayer.color }} onClick={() => handleAwardPoints(currentPlayer.id)}>
+                                    {currentPlayer.pawn} {currentPlayer.name}
                                 </button>
-                            ))}
+                            ) : (
+                                <p>Lỗi: Không tìm thấy người chơi.</p>
+                            )}
                         </div>
                     </>
                 )}
@@ -152,6 +154,7 @@ const MultiSelectModal = ({ onClose, question, players, onCorrectAnswer, activeD
                      </p>
                 )}
             </div>
+            {/* ======================================= */}
         </div>
     );
 };

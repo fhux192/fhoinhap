@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const MultipleChoiceModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut }) => {
+// ===== THAY ĐỔI: Nhận thêm prop `currentPlayerId` =====
+const MultipleChoiceModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut, currentPlayerId }) => {
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(null);
@@ -45,6 +46,9 @@ const MultipleChoiceModal = ({ onClose, question, players, onCorrectAnswer, acti
         onCorrectAnswer(points, question.id, teamId, activeDoublePointsTeamId);
     };
 
+    // ===== THAY ĐỔI: Tìm người chơi hiện tại =====
+    const currentPlayer = players.find(p => p.id === currentPlayerId);
+
     const getOptionStyle = (index) => {
         if (!isAnswered) {
             return styles.optionButton;
@@ -79,11 +83,9 @@ const MultipleChoiceModal = ({ onClose, question, players, onCorrectAnswer, acti
                 <p style={styles.instructionText}>Chọn một đáp án đúng</p>
                 <div style={styles.optionsContainer}>
                     {question.options.map((option, index) => {
-                        // ===== ĐÂY LÀ PHẦN SỬA LỖI QUAN TRỌNG =====
                         const itemAnimation = {
                             animation: isAnimatingOut ? 'none' : `fadeInUpItem 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
                             animationDelay: `${300 + index * 120}ms`,
-                            // Dòng `opacity: 0` đã được XÓA BỎ ở đây
                             animationFillMode: 'backwards',
                         };
 
@@ -108,17 +110,20 @@ const MultipleChoiceModal = ({ onClose, question, players, onCorrectAnswer, acti
                 </div>
             </div>
 
+            {/* ===== THAY ĐỔI: Cập nhật logic footer ===== */}
             <div style={styles.footer}>
                 {isAnswered && isCorrect && (
                     <>
                         <p style={{...styles.feedbackText, color: '#2ed573'}}>Chính xác!</p>
                         <p style={styles.awardText}>Thưởng điểm cho đội:</p>
                         <div style={styles.answerButtonsContainer}>
-                            {players.map(player => (
-                                <button key={player.id} style={{ ...styles.awardButton, backgroundColor: player.color }} onClick={() => handleAwardPoints(player.id)}>
-                                    {player.pawn} {player.name}
+                            {currentPlayer ? (
+                                <button key={currentPlayer.id} style={{ ...styles.awardButton, backgroundColor: currentPlayer.color }} onClick={() => handleAwardPoints(currentPlayer.id)}>
+                                    {currentPlayer.pawn} {currentPlayer.name}
                                 </button>
-                            ))}
+                            ) : (
+                                <p>Lỗi: Không tìm thấy người chơi.</p>
+                            )}
                         </div>
                     </>
                 )}
@@ -128,6 +133,7 @@ const MultipleChoiceModal = ({ onClose, question, players, onCorrectAnswer, acti
                      </p>
                 )}
             </div>
+            {/* ======================================= */}
         </div>
     );
 };

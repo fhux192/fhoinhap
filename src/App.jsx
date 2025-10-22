@@ -5,6 +5,7 @@ import MultipleChoiceModal from './MultipleChoiceModal';
 import MultiSelectModal from './MultiSelectModal';
 import TrueFalsePairModal from './TrueFalsePairModal';
 import EndGameSummary from './EndGameSummary';
+import TurnSpinner from './TurnSpinner';
 import './animations.css';
 
 const PLAYERS_CONFIG = [
@@ -16,127 +17,200 @@ const PLAYERS_CONFIG = [
 const NUMBER_OF_STEPS = 20;
 
 const sampleQuestions = [
+  // CÂU HỎI 1 (MC - 5 lựa chọn, 1 đáp án)
   {
     "id": 1,
-    "points": 3,
-    "question": "Hiện tượng “tư duy nhóm” (Groupthink) là gì và nó dẫn đến hậu quả tiêu cực nào?"
-  },
-  {
-    "id": 2,
-    "points": 3,
-    "question": "Sự khác biệt cơ bản giữa một nhà lãnh đạo (leader) và một nhà quản lý (manager) là gì?"
-  },
-  {
-    "id": 3,
-    "points": 2,
+    "points": 2, // 5 lựa chọn, 1 đáp án = 2 điểm
     "type": "multiple_choice",
-    "question": "Một trong những vai trò chính của việc lập kế hoạch trong nhóm là gì?",
+    "question": "Mô hình S.M.A.R.T. thường được sử dụng để làm gì?",
     "options": [
-      "Tạo ra sự cạnh tranh giữa các thành viên",
-      "Giảm thiểu bất định và rủi ro",
-      "Loại bỏ hoàn toàn nhu cầu giao tiếp",
-      "Chỉ tập trung vào các mục tiêu dài hạn"
-    ],
-    "correctAnswer": 1
-  },
-  {
-    "id": 4,
-    "points": 3,
-    "type": "multi_select",
-    "question": "Trong mô hình S.M.A.R.T, chữ 'R' và 'T' đại diện cho điều gì? (Chọn 2 đáp án)",
-    "options": [
-      "Realistic (Thực tế)",
-      "Relevant (Liên quan)",
-      "Time-bound (Có thời hạn)",
-      "Trustworthy (Đáng tin cậy)"
-    ],
-    "correctAnswer": [1, 2]
-  },
-  {
-    "id": 5,
-    "points": 1,
-    "type": "multiple_choice",
-    "question": "OKR là viết tắt của cụm từ tiếng Anh nào?",
-    "options": [
-      "Objectives and Key Results",
-      "Official Key Responsibilities",
-      "Organizational Knowledge Repository",
-      "Operational Key Routines"
+      "Thiết lập mục tiêu rõ ràng và khả thi",
+      "Giải quyết mâu thuẫn trong nhóm",
+      "Phân chia ngân sách dự án",
+      "Bầu ra một nhóm trưởng",
+      "Theo dõi tiến độ hàng ngày"
     ],
     "correctAnswer": 0
   },
+  // CÂU HỎI 2 (Multi-select - 5 lựa chọn, 3 đáp án)
   {
-    "id": 6,
-    "points": 3,
-    "question": "Trong phương pháp 5W1H, yếu tố \"Why\" (Tại sao) có vai trò quan trọng để làm gì?"
+    "id": 10,
+    "points": 3, // Multi-select = 3 điểm
+    "type": "multi_select",
+    "question": "Trong mô hình S.M.A.R.T, chữ 'S', 'M' và 'T' đại diện cho điều gì? (Chọn 3 đáp án)",
+    "options": [
+      "Specific (Cụ thể)",
+      "Measurable (Đo lường được)",
+      "Simple (Đơn giản)",
+      "Team-work (Làm việc nhóm)",
+      "Time-bound (Có thời hạn)"
+    ],
+    "correctAnswer": [0, 1, 4]
   },
+  // CÂU HỎI 3 (T/F Pair - 3 mệnh đề)
   {
-    "id": 7,
-    "points": 3,
+    "id": 5,
+    "points": 3, // 3 mệnh đề = 3 điểm
+    "type": "true_false_pair",
+    "question": "Xác định tính đúng/sai của ba mệnh đề sau:",
+    "statements": [
+      {
+        "id": 0,
+        "text": "Một trong 3 nhiệm vụ chính của lãnh đạo là 'tạo tầm nhìn'.",
+        "correctAnswer": true
+      },
+      {
+        "id": 1,
+        "text": "Nhiệm vụ chính của lãnh đạo là 'lập kế hoạch chi tiết' và 'quản lý ngân sách'.",
+        "correctAnswer": false
+      },
+      {
+        "id": 2,
+        "text": "Lãnh đạo (Leader) và Quản lý (Manager) là hai vai trò hoàn toàn giống nhau.",
+        "correctAnswer": false
+      }
+    ]
+  },
+  // CÂU HỎI 4 (MC - 4 lựa chọn, 1 đáp án)
+  {
+    "id": 3,
+    "points": 2, // 4 lựa chọn, 1 đáp án = 2 điểm
+    "type": "multiple_choice",
+    "question": "Sự khác biệt cơ bản giữa Lãnh đạo (Leader) và Quản lý (Manager) là gì?",
+    "options": [
+      "Lãnh đạo 'tìm đường', Quản lý 'đi đường'",
+      "Lãnh đạo 'đi đường', Quản lý 'tìm đường'",
+      "Lãnh đạo tập trung vào chi tiết, Quản lý tập trung vào tầm nhìn",
+      "Không có sự khác biệt nào"
+    ],
+    "correctAnswer": 0
+  },
+  // CÂU HỎI 5 (Multi-select - 6 lựa chọn, 3 đáp án)
+  {
+    "id": 9,
+    "points": 3, // Multi-select = 3 điểm
     "type": "multi_select",
     "question": "Ba nhiệm vụ chính nào kết hợp lại để tạo nên một nhà lãnh đạo? (Chọn 3 đáp án)",
     "options": [
       "Tạo tầm nhìn",
       "Tạo cảm hứng",
       "Tạo ảnh hưởng",
-      "Quản lý ngân sách",
-      "Lập kế hoạch chi tiết"
+      "Theo dõi tiến độ hàng ngày",
+      "Giải quyết mâu thuẫn",
+      "Báo cáo công việc chi tiết"
     ],
     "correctAnswer": [0, 1, 2]
   },
+  // CÂU HỎI 6 (MC - 6 lựa chọn, 1 đáp án)
+  {
+    "id": 4,
+    "points": 3, // 6 lựa chọn, 1 đáp án = 3 điểm (khó hơn)
+    "type": "multiple_choice",
+    "question": "Hiện tượng 'Tư duy nhóm' (Groupthink) là gì?",
+    "options": [
+      "Một buổi họp nhóm để sáng tạo ý tưởng mới (Brainstorming)",
+      "Khi các thành viên quá sợ mâu thuẫn và đồng ý với nhau quá dễ",
+      "Khi nhóm trưởng phân chia công việc một cách công bằng",
+      "Một phương pháp bỏ phiếu dân chủ trong nhóm",
+      "Khi cả nhóm cùng nhau ghét một ý tưởng",
+      "Khi các thành viên tranh cãi quá gay gắt"
+    ],
+    "correctAnswer": 1
+  },
+  // CÂU HỎI 7 (T/F Pair - 2 mệnh đề)
   {
     "id": 8,
-    "points": 2,
+    "points": 1, // 2 mệnh đề dễ = 1 điểm
     "type": "true_false_pair",
     "question": "Xác định tính đúng/sai của hai mệnh đề sau:",
     "statements": [
       {
         "id": 0,
-        "text": "Một nhà quản lý giỏi thì chắc chắn cũng là một nhà lãnh đạo.",
+        "text": "Một nhà quản lý (Manager) giỏi thì chắc chắn cũng là một nhà lãnh đạo (Leader) giỏi.",
         "correctAnswer": false
       },
       {
         "id": 1,
-        "text": "\"Key Results\" (Kết quả then chốt) trong OKR là các kết quả định tính, mang tính truyền cảm hứng.",
-        "correctAnswer": false
+        "text": "Mục tiêu chung giúp cả nhóm đi đúng hướng.",
+        "correctAnswer": true
       }
     ]
   },
-  {
-    "id": 9,
-    "points": 3,
-    "question": "Quy trình thực hiện kỹ năng quản lý nhóm gồm 5 bước. Hãy cho biết bước thứ 3 trong quy trình đó là gì?"
-  },
-  {
-    "id": 10,
-    "points": 2,
-    "question": "Bước đầu tiên mà người quản lý cần làm khi giải quyết mâu thuẫn trong nhóm là gì?"
-  },
+  // CÂU HỎI 8 (Multi-select - 4 lựa chọn, 2 đáp án)
   {
     "id": 11,
-    "points": 2,
-    "type": "multiple_choice",
-    "question": "Mô hình S.M.A.R.T. được sử dụng để làm gì?",
+    "points": 3, // Multi-select = 3 điểm
+    "type": "multi_select",
+    "question": "Những công việc nào sau đây thuộc về Kỹ năng Quản lý (Management)? (Chọn 2 đáp án)",
     "options": [
-      "Giải quyết xung đột trong nhóm",
-      "Xây dựng mục tiêu rõ ràng và khả thi",
-      "Phân chia ngân sách dự án",
-      "Đánh giá hiệu suất cuối kỳ của thành viên"
+      "Tạo ra một tầm nhìn chiến lược mới cho tổ chức",
+      "Giám sát tiến độ và đốc thúc các thành viên",
+      "Truyền cảm hứng để mọi người vượt qua khó khăn",
+      "Phân công công việc và giải quyết các mâu thuẫn"
     ],
-    "correctAnswer": 1
+    "correctAnswer": [1, 3]
   },
+  // CÂU HỎI 9 (T/F Pair - 2 mệnh đề)
+  {
+    "id": 6,
+    "points": 2, // 2 mệnh đề = 2 điểm
+    "type": "true_false_pair",
+    "question": "Xác định tính đúng/sai của hai mệnh đề sau:",
+    "statements": [
+      {
+        "id": 0,
+        "text": "Một kế hoạch tốt là một kế hoạch cứng nhắc và không bao giờ được thay đổi.",
+        "correctAnswer": false
+      },
+      {
+        "id": 1,
+        "text": "Kỹ năng quản lý nhóm bao gồm việc theo dõi tiến độ và giải quyết mâu thuẫn.",
+        "correctAnswer": true
+      }
+    ]
+  },
+  // CÂU HỎI 10 (MC - 4 lựa chọn, 1 đáp án)
+  {
+    "id": 2,
+    "points": 2, // 4 lựa chọn, 1 đáp án = 2 điểm
+    "type": "multiple_choice",
+    "question": "Vai trò chính của việc 'Lập kế hoạch' trong nhóm là gì?",
+    "options": [
+      "Truyền cảm hứng cho tất cả thành viên",
+      "Loại bỏ hoàn toàn mọi rủi ro có thể xảy ra",
+      "Cung cấp một 'bản đồ' rõ ràng để giảm bất định",
+      "Chỉ tập trung vào các mục tiêu dài hạn"
+    ],
+    "correctAnswer": 2
+  },
+  // CÂU HỎI 11 (T/F Pair - 1 mệnh đề)
+  {
+    "id": 7,
+    "points": 1, // 1 mệnh đề = 1 điểm
+    "type": "true_false_pair",
+    "question": "Xác định tính đúng/sai của mệnh đề sau về 5W1H:",
+    "statements": [
+      {
+        "id": 0,
+        "text": "Chữ 'Why' (Tại sao) giúp nhóm hiểu rõ mục đích của công việc.",
+        "correctAnswer": true
+      }
+    ]
+  },
+  // CÂU HỎI 12 (Multi-select - 5 lựa chọn, 3 đáp án)
   {
     "id": 12,
-    "points": 3,
-    "type": "multiple_choice",
-    "question": "Phong cách lãnh đạo nào phù hợp nhất cho việc thảo luận và lấy ý kiến từ các thành viên?",
+    "points": 3, // Multi-select = 3 điểm
+    "type": "multi_select",
+    "question": "Phương pháp 5W1H bao gồm những câu hỏi nào? (Chọn 3 đáp án)",
     "options": [
-      "Độc đoán (Autocratic)",
-      "Dân chủ (Democratic)",
-      "Tự do (Laissez-faire)",
-      "Chỉ đạo (Directive)"
+      "What (Cái gì?)",
+      "When (Khi nào?)",
+      "Which (Cái nào?)",
+      "How (Như thế nào?)",
+      "How many (Bao nhiêu?)"
     ],
-    "correctAnswer": 1
+    "correctAnswer": [0, 1, 3]
   }
 ]
 
@@ -215,6 +289,22 @@ function App() {
     const [activeCardId, setActiveCardId] = useState(null);
     const [isGameOver, setIsGameOver] = useState(false);
 
+    const [isGameStarted, setIsGameStarted] = useState(false);
+
+    const [turnOrder, setTurnOrder] = useState([]);
+    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            e.returnValue = '';
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
     useEffect(() => {
         if (answeredCardIds.length > 0 && answeredCardIds.length === sampleQuestions.length) {
             setTimeout(() => {
@@ -222,6 +312,19 @@ function App() {
             }, 500);
         }
     }, [answeredCardIds]);
+
+    const handleOrderDecided = (orderIds) => {
+        setTurnOrder(orderIds);
+        setCurrentPlayerIndex(0);
+    };
+
+    const handleStartGame = () => {
+        if (turnOrder.length === 0) {
+            alert("Bạn phải quay để chọn lượt trước!");
+            return;
+        }
+        setIsGameStarted(true);
+    };
 
     const handleActivateDoublePoints = (teamId, cardId) => {
         if (!doublePointsRemaining[teamId]) return;
@@ -247,6 +350,9 @@ function App() {
                 [activeDoublePointsTeamId]: false
             }));
         }
+
+        setCurrentPlayerIndex(prevIndex => (prevIndex + 1) % turnOrder.length);
+
         setIsAnimatingOut(true);
         setTimeout(() => {
             setModal({ isOpen: false, question: null });
@@ -266,6 +372,9 @@ function App() {
         if (doublePointsActivatorId !== null) {
             setDoublePointsRemaining(prev => ({ ...prev, [doublePointsActivatorId]: false }));
         }
+
+        setCurrentPlayerIndex(prevIndex => (prevIndex + 1) % turnOrder.length);
+
         setIsAnimatingOut(true);
         setTimeout(() => {
             setModal({ isOpen: false, question: null });
@@ -280,64 +389,103 @@ function App() {
         setAnsweredCardIds([]);
         setDoublePointsRemaining(initialDoublePoints);
         setIsGameOver(false);
+
+        setIsGameStarted(false);
+        setTurnOrder([]);
+        setCurrentPlayerIndex(0);
     };
+
+    const currentPlayerId = isGameStarted ? turnOrder[currentPlayerIndex] : null;
 
     return (
         <div style={styles.app}>
-            <h1 style={styles.header}>🏁 Trò chơi Hội Nhập 🏁</h1>
-            <div style={styles.doublePointsStatus}>
-                <h3>Lượt nhân đôi điểm còn lại:</h3>
-                <div style={styles.doublePointsBadges}>
-                    {PLAYERS_CONFIG.map(player => (
-                        <div key={player.id} style={{ ...styles.doublePointsBadge, backgroundColor: doublePointsRemaining[player.id] ? player.color : '#6b7280', opacity: doublePointsRemaining[player.id] ? 1 : 0.5 }}>
-                            {player.pawn} {player.name}: {doublePointsRemaining[player.id] ? 'Còn lượt' : 'Đã dùng'}
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <QuestionDeck
-                questions={sampleQuestions}
-                answeredCardIds={answeredCardIds}
-                players={PLAYERS_CONFIG}
-                doublePointsState={doublePointsRemaining}
-                onActivateDoublePoints={handleActivateDoublePoints}
-                onViewQuestion={handleViewQuestion}
-            />
-            <GameBoard playerPositions={playerPositions} />
 
-
-
-            {modal.isOpen && (
-                <div
-                    style={styles.overlay}
-                    className={isAnimatingOut ? 'modal-overlay-exit' : 'modal-overlay-enter'}
-                    onClick={handleSkipQuestion}
-                >
-                    {(() => {
-                        const props = {
-                            onClose: handleSkipQuestion,
-                            question: modal.question,
-                            players: PLAYERS_CONFIG,
-                            onCorrectAnswer: handleQuestionAnswered,
-                            activeDoublePointsTeamId: activeCardId === modal.question?.id ? activeDoublePointsTeamId : null,
-                            isAnimatingOut: isAnimatingOut,
-                        };
-                        switch (modal.question.type) {
-                            case 'true_false_pair': return <TrueFalsePairModal {...props} />;
-                            case 'multi_select': return <MultiSelectModal {...props} />;
-                            case 'multiple_choice': return <MultipleChoiceModal {...props} />;
-                            default: return <QuestionModal {...props} />;
-                        }
-                    })()}
-                </div>
+            {!isGameStarted && (
+                <TurnSpinner
+                    players={PLAYERS_CONFIG}
+                    onOrderDecided={handleOrderDecided}
+                    onClose={handleStartGame}
+                />
             )}
 
-            {isGameOver && (
-                <EndGameSummary
-                    players={PLAYERS_CONFIG}
-                    positions={playerPositions}
-                    onRestart={handleRestartGame}
-                />
+            {isGameStarted && (
+                <>
+                    <h1 style={styles.header}>🏁 Trò chơi Hội Nhập 🏁</h1>
+
+                    <div style={styles.doublePointsStatus}>
+                        {(() => {
+                            const currentPlayer = PLAYERS_CONFIG.find(p => p.id === currentPlayerId);
+                            if (!currentPlayer) return null;
+
+                            return (
+                                <div style={styles.turnIndicator}>
+                                    Đến lượt:
+                                    <span style={{...styles.turnPlayer, color: currentPlayer.color, textShadow: currentPlayer.shadow}}>
+                                        {currentPlayer.pawn} {currentPlayer.name}
+                                    </span>
+                                </div>
+                            );
+                        })()}
+
+                        <div style={styles.doublePointsHeader}>
+                            <h3>Lượt nhân đôi điểm còn lại:</h3>
+                        </div>
+
+                        <div style={styles.doublePointsBadges}>
+                            {PLAYERS_CONFIG.map(player => (
+                                <div key={player.id} style={{ ...styles.doublePointsBadge, backgroundColor: doublePointsRemaining[player.id] ? player.color : '#6b7280', opacity: doublePointsRemaining[player.id] ? 1 : 0.5 }}>
+                                    {player.pawn} {player.name}: {doublePointsRemaining[player.id] ? 'Còn lượt' : 'Đã dùng'}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <QuestionDeck
+                        questions={sampleQuestions}
+                        answeredCardIds={answeredCardIds}
+                        players={PLAYERS_CONFIG}
+                        doublePointsState={doublePointsRemaining}
+                        onActivateDoublePoints={handleActivateDoublePoints}
+                        onViewQuestion={handleViewQuestion}
+                        currentPlayerId={currentPlayerId}
+                    />
+                    <GameBoard playerPositions={playerPositions} />
+
+                    {modal.isOpen && (
+                        <div
+                            style={styles.overlay}
+                            className={isAnimatingOut ? 'modal-overlay-exit' : 'modal-overlay-enter'}
+                            onClick={handleSkipQuestion}
+                        >
+                            {(() => {
+                                const props = {
+                                    onClose: handleSkipQuestion,
+                                    question: modal.question,
+                                    players: PLAYERS_CONFIG,
+                                    onCorrectAnswer: handleQuestionAnswered,
+                                    activeDoublePointsTeamId: activeCardId === modal.question?.id ? activeDoublePointsTeamId : null,
+                                    isAnimatingOut: isAnimatingOut,
+                                    // ===== THAY ĐỔI: TRUYỀN currentPlayerId XUỐNG =====
+                                    currentPlayerId: currentPlayerId,
+                                };
+                                switch (modal.question.type) {
+                                    case 'true_false_pair': return <TrueFalsePairModal {...props} />;
+                                    case 'multi_select': return <MultiSelectModal {...props} />;
+                                    case 'multiple_choice': return <MultipleChoiceModal {...props} />;
+                                    default: return <QuestionModal {...props} />;
+                                }
+                            })()}
+                        </div>
+                    )}
+
+                    {isGameOver && (
+                        <EndGameSummary
+                            players={PLAYERS_CONFIG}
+                            positions={playerPositions}
+                            onRestart={handleRestartGame}
+                        />
+                    )}
+                </>
             )}
         </div>
     );
@@ -392,15 +540,33 @@ const styles = {
         color: '#e0e0e0',
         marginBottom: '30px'
     },
+    turnIndicator: {
+        fontSize: '1.5rem',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: '15px',
+        color: '#f1f5f9',
+        borderBottom: '1px solid #4a4a68',
+        paddingBottom: '15px'
+    },
+    turnPlayer: {
+        marginLeft: '10px',
+    },
     doublePointsStatus: {
         backgroundColor: 'rgba(15, 23, 42, 0.8)',
         color: '#e0e0e0',
         borderRadius: '22px',
-        padding:'20px',
-        paddingTop: '0px',
+        padding: '15px 25px 20px 25px',
         marginBottom: '0px',
         border: '1px solid rgba(255, 255, 255, 0.1)',
-        textAlign: 'center'
+    },
+    doublePointsHeader: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '20px',
+        flexWrap: 'wrap',
+        marginBottom: '15px',
     },
     doublePointsBadges: {
         display: 'flex',

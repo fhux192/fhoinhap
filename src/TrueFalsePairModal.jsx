@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut }) => {
-    const [answers, setAnswers] = useState({ 0: null, 1: null });
+// ===== THAY ĐỔI: Nhận thêm prop `currentPlayerId` =====
+const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activeDoublePointsTeamId, isAnimatingOut, currentPlayerId }) => {
+
+    // ===== THAY ĐỔI: State `answers` sẽ được khởi tạo động =====
+    const [answers, setAnswers] = useState({});
     const [isAnswered, setIsAnswered] = useState(false);
     const [isCorrect, setIsCorrect] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(30);
+
+    // ===== THAY ĐỔI: Thời gian sẽ dựa trên số lượng mệnh đề (20 giây/mệnh đề) =====
+    const [timeLeft, setTimeLeft] = useState(20 * question.statements.length);
     const timerRef = useRef(null);
 
     const handleTimeUp = () => {
@@ -13,10 +18,22 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
     };
 
     useEffect(() => {
-        setAnswers({ 0: null, 1: null });
+        // ===== THAY ĐỔI: Khởi tạo `answers` dựa trên số lượng mệnh đề =====
+        const initialAnswers = {};
+        question.statements.forEach((_, index) => {
+            initialAnswers[index] = null;
+        });
+        setAnswers(initialAnswers);
+        // ========================================================
+
         setIsAnswered(false);
         setIsCorrect(null);
-        setTimeLeft(30);
+
+        // ===== THAY ĐỔI: Tính toán thời gian động =====
+        const totalTime = 20 * question.statements.length;
+        setTimeLeft(totalTime);
+        // ========================================
+
         timerRef.current = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
 
         return () => clearInterval(timerRef.current);
@@ -38,17 +55,32 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
     };
 
     const handleCheckAnswer = () => {
-        if (answers[0] === null || answers[1] === null) return;
+        // ===== THAY ĐỔI: Kiểm tra tất cả mệnh đề đã được trả lời chưa =====
+        const allAnswered = question.statements.every((_, index) => answers[index] !== null);
+        if (!allAnswered) return;
+        // ==========================================================
+
         clearInterval(timerRef.current);
         setIsAnswered(true);
-        const isFirstCorrect = answers[0] === question.statements[0].correctAnswer;
-        const isSecondCorrect = answers[1] === question.statements[1].correctAnswer;
-        setIsCorrect(isFirstCorrect && isSecondCorrect);
+
+        // ===== THAY ĐỔI: Duyệt qua tất cả mệnh đề để kiểm tra đáp án =====
+        let allCorrect = true;
+        for (let i = 0; i < question.statements.length; i++) {
+            if (answers[i] !== question.statements[i].correctAnswer) {
+                allCorrect = false;
+                break;
+            }
+        }
+        setIsCorrect(allCorrect);
+        // ===========================================================
     };
 
     const handleAwardPoints = (teamId) => {
         onCorrectAnswer(points, question.id, teamId, activeDoublePointsTeamId);
     };
+
+    // ===== THAY ĐỔI: Tìm người chơi hiện tại =====
+    const currentPlayer = players.find(p => p.id === currentPlayerId);
 
     const getGliderStyle = (statementIndex) => {
         const style = { ...styles.glider };
@@ -62,6 +94,7 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
             if (userChoice === true) style.backgroundColor = '#10b981';
             else if (userChoice === false) style.backgroundColor = '#ef4444';
         } else {
+            // Kiểm tra đáp án của TỪNG mệnh đề
             const isChoiceCorrect = userChoice === question.statements[statementIndex].correctAnswer;
             style.backgroundColor = isChoiceCorrect ? '#2ed573' : '#ff4757';
         }
@@ -73,6 +106,9 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
         if (answers[statementIndex] === choice) style.color = '#ffffff';
         return style;
     };
+
+    // ===== THAY ĐỔI: Biến để kiểm tra nút "Kiểm tra đáp án" =====
+    const allStatementsAnswered = question.statements.every((_, index) => answers[index] !== null);
 
     return (
         <div
@@ -93,7 +129,6 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
             <div style={styles.content}>
                 <p style={styles.questionTitle}>{question.question}</p>
                 {question.statements.map((statement, index) => {
-                    // ===== THAY ĐỔI: Tạo style animation động cho từng khối câu hỏi =====
                     const itemAnimation = {
                         animation: isAnimatingOut ? 'none' : `fadeInUpItem 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
                         animationDelay: `${300 + index * 150}ms`,
@@ -121,7 +156,12 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
 
             <div style={styles.footer}>
                 {!isAnswered && (
-                    <button style={{...styles.checkAnswerButton, opacity: (answers[0] === null || answers[1] === null) ? 0.5 : 1}} onClick={handleCheckAnswer} disabled={answers[0] === null || answers[1] === null}>
+                    // ===== THAY ĐỔI: Logic disable nút =====
+                    <button
+                        style={{...styles.checkAnswerButton, opacity: allStatementsAnswered ? 1 : 0.5}}
+                        onClick={handleCheckAnswer}
+                        disabled={!allStatementsAnswered}
+                    >
                         Kiểm tra đáp án
                     </button>
                 )}
@@ -130,11 +170,13 @@ const TrueFalsePairModal = ({ onClose, question, players, onCorrectAnswer, activ
                         <p style={{...styles.feedbackText, color: '#2ed573'}}>Chính xác!</p>
                         <p style={styles.awardText}>Thưởng điểm cho đội:</p>
                         <div style={styles.answerButtonsContainer}>
-                            {players.map(player => (
-                                <button key={player.id} style={{ ...styles.awardButton, backgroundColor: player.color }} onClick={() => handleAwardPoints(player.id)}>
-                                    {player.pawn} {player.name}
+                            {currentPlayer ? (
+                                <button key={currentPlayer.id} style={{ ...styles.awardButton, backgroundColor: currentPlayer.color }} onClick={() => handleAwardPoints(currentPlayer.id)}>
+                                    {currentPlayer.pawn} {currentPlayer.name}
                                 </button>
-                            ))}
+                            ) : (
+                                <p>Lỗi: Không tìm thấy người chơi.</p>
+                            )}
                         </div>
                     </>
                 )}
